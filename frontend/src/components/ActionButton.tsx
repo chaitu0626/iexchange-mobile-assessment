@@ -1,4 +1,4 @@
-import { Pressable, StyleSheet, Text } from "react-native";
+import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-native";
 import { colors } from "./theme";
 
 type ActionButtonProps = {
@@ -6,6 +6,7 @@ type ActionButtonProps = {
   onPress: () => void;
   variant?: "primary" | "secondary";
   disabled?: boolean;
+  loading?: boolean;
 };
 
 export function ActionButton({
@@ -13,30 +14,41 @@ export function ActionButton({
   onPress,
   variant = "primary",
   disabled = false,
+  loading = false,
 }: ActionButtonProps) {
   const secondary = variant === "secondary";
+  const isDisabled = disabled || loading;
 
   return (
     <Pressable
       accessibilityRole="button"
-      disabled={disabled}
+      accessibilityState={{ busy: loading, disabled: isDisabled }}
+      disabled={isDisabled}
       onPress={onPress}
       style={({ pressed }) => [
         styles.button,
         secondary ? styles.secondaryButton : styles.primaryButton,
-        disabled && styles.disabledButton,
-        pressed && !disabled && styles.pressedButton,
+        isDisabled && styles.disabledButton,
+        pressed && !isDisabled && styles.pressedButton,
       ]}
     >
-      <Text
-        style={[
-          styles.label,
-          secondary ? styles.secondaryLabel : styles.primaryLabel,
-          disabled && styles.disabledLabel,
-        ]}
-      >
-        {title}
-      </Text>
+      <View style={styles.content}>
+        {loading && (
+          <ActivityIndicator
+            color={secondary ? colors.blue : colors.white}
+            size="small"
+          />
+        )}
+        <Text
+          style={[
+            styles.label,
+            secondary ? styles.secondaryLabel : styles.primaryLabel,
+            isDisabled && !loading && styles.disabledLabel,
+          ]}
+        >
+          {title}
+        </Text>
+      </View>
     </Pressable>
   );
 }
@@ -67,6 +79,11 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 15,
     fontWeight: "700",
+  },
+  content: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 9,
   },
   primaryLabel: {
     color: colors.white,

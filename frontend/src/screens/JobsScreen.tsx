@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import {
+  Alert,
   Animated,
   ScrollView,
   StyleSheet,
@@ -14,6 +15,7 @@ import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { JobCard, type JobCardData } from "../components/JobCard";
 import { colors } from "../components/theme";
+import { useAuth } from "../context/AuthContext";
 import { SavedJobsScreen } from "./SavedJobsScreen";
 import type { MainTabParamList, RootStackParamList } from "../types/navigation";
 
@@ -53,6 +55,7 @@ const sampleJobs: JobCardData[] = [
 
 export function JobsScreen({ navigation }: JobsScreenProps) {
   const [selectedTab, setSelectedTab] = useState<JobsTab>("all");
+  const { isAuthenticated } = useAuth();
   const insets = useSafeAreaInsets();
   const { width: windowWidth } = useWindowDimensions();
   const pageWidth = windowWidth - 40;
@@ -142,6 +145,27 @@ export function JobsScreen({ navigation }: JobsScreenProps) {
                   <JobCard
                     key={job.id}
                     job={job}
+                    onSave={() => {
+                      if (!isAuthenticated) {
+                        Alert.alert(
+                          "Login required",
+                          "Please log in or create an account to save jobs.",
+                          [
+                            { text: "Cancel", style: "cancel" },
+                            {
+                              text: "Login",
+                              onPress: () => navigation.navigate("Login"),
+                            },
+                          ]
+                        );
+                        return;
+                      }
+
+                      Alert.alert(
+                        "Saved Jobs",
+                        "Saving jobs will be available when job services are connected."
+                      );
+                    }}
                     onPress={() =>
                       navigation.navigate("JobDetails", {
                         jobId: job.id,

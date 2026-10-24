@@ -13,36 +13,51 @@ export type JobCardData = {
 type JobCardProps = {
   job: JobCardData;
   onPress: () => void;
+  onSave: () => void;
 };
 
-export function JobCard({ job, onPress }: JobCardProps) {
+export function JobCard({ job, onPress, onSave }: JobCardProps) {
   return (
-    <Pressable
-      accessibilityRole="button"
-      onPress={onPress}
-      style={({ pressed }) => [styles.card, pressed && styles.pressed]}
-    >
+    <View style={styles.card}>
       <View style={styles.topRow}>
-        <View style={styles.companyIcon}>
-          <Text style={styles.companyInitials}>{job.initials}</Text>
-        </View>
-        <View style={styles.titleBlock}>
-          <Text numberOfLines={1} style={styles.title}>
-            {job.title}
+        <Pressable
+          accessibilityRole="button"
+          onPress={onPress}
+          style={({ pressed }) => [styles.jobLink, pressed && styles.pressed]}
+        >
+          <View style={styles.companyIcon}>
+            <Text style={styles.companyInitials}>{job.initials}</Text>
+          </View>
+          <View style={styles.titleBlock}>
+            <Text numberOfLines={1} style={styles.title}>
+              {job.title}
+            </Text>
+            <Text style={styles.company}>{job.company}</Text>
+          </View>
+          <Text accessibilityLabel="View job details" style={styles.chevron}>
+            ›
           </Text>
-          <Text style={styles.company}>{job.company}</Text>
-        </View>
-        <Text accessibilityLabel="View job details" style={styles.chevron}>
-          ›
-        </Text>
+        </Pressable>
+        <Pressable
+          accessibilityLabel="Save job"
+          accessibilityRole="button"
+          onPress={onSave}
+          style={({ pressed }) => [styles.saveButton, pressed && styles.pressed]}
+        >
+          <Text style={styles.saveIcon}>♡</Text>
+        </Pressable>
       </View>
-      <View style={styles.bottomRow}>
+      <Pressable
+        accessibilityRole="button"
+        onPress={onPress}
+        style={({ pressed }) => [styles.bottomRow, pressed && styles.pressed]}
+      >
         <Text style={styles.location}>{job.location}</Text>
         <View style={styles.typePill}>
           <Text style={styles.typeText}>{job.type}</Text>
         </View>
-      </View>
-    </Pressable>
+      </Pressable>
+    </View>
   );
 }
 
@@ -55,13 +70,31 @@ const styles = StyleSheet.create({
     gap: 18,
     padding: 17,
   },
+  jobLink: {
+    alignItems: "center",
+    flex: 1,
+    flexDirection: "row",
+    gap: 12,
+  },
+  saveButton: {
+    alignItems: "center",
+    borderRadius: 18,
+    height: 36,
+    justifyContent: "center",
+    width: 36,
+  },
+  saveIcon: {
+    color: colors.blue,
+    fontSize: 26,
+    lineHeight: 30,
+  },
   pressed: {
     opacity: 0.82,
   },
   topRow: {
     alignItems: "center",
     flexDirection: "row",
-    gap: 12,
+    gap: 4,
   },
   companyIcon: {
     alignItems: "center",

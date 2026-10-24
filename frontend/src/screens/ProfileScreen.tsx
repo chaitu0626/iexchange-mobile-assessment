@@ -1,8 +1,15 @@
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { useState } from "react";
+import {
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import type { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import type { CompositeScreenProps } from "@react-navigation/native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useAuth } from "../context/AuthContext";
 import { ActionButton } from "../components/ActionButton";
 import { colors } from "../components/theme";
 import type { MainTabParamList, RootStackParamList } from "../types/navigation";
@@ -14,6 +21,23 @@ type ProfileScreenProps = CompositeScreenProps<
 
 export function ProfileScreen({ navigation }: ProfileScreenProps) {
   const insets = useSafeAreaInsets();
+  const { user, isAuthenticated, restoreError, logout } = useAuth();
+  const [logoutError, setLogoutError] = useState<string | null>(null);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  async function handleLogout() {
+    setLogoutError(null);
+    setIsLoggingOut(true);
+    try {
+      await logout();
+    } catch (error) {
+      setLogoutError(
+        error instanceof Error ? error.message : "Could not sign out."
+      );
+    } finally {
+      setIsLoggingOut(false);
+    }
+  }
 
   return (
     <ScrollView
@@ -28,31 +52,59 @@ export function ProfileScreen({ navigation }: ProfileScreenProps) {
 
       <View style={styles.profileCard}>
         <View style={styles.avatar}>
-          <Text style={styles.avatarText}>G</Text>
-        </View>
-        <View style={styles.profileCopy}>
-          <Text style={styles.name}>Welcome to iExchange</Text>
-          <Text style={styles.description}>
-            Sign in or create an account to get started.
+          <Text style={styles.avatarText}>
+            {isAuthenticated ? user?.name.charAt(0).toUpperCase() : "G"}
           </Text>
         </View>
+        <View style={styles.profileCopy}>
+          {isAuthenticated && user ? (
+            <>
+              <Text style={styles.name}>{user.name}</Text>
+              <Text style={styles.description}>{user.email}</Text>
+            </>
+          ) : (
+            <>
+              <Text style={styles.name}>Welcome to iExchange</Text>
+              <Text style={styles.description}>
+                Sign in or create an account to get started.
+              </Text>
+            </>
+          )}
+        </View>
       </View>
 
-      <View style={styles.actions}>
-        <ActionButton
-          onPress={() => navigation.navigate("Login")}
-          title="Sign in"
-        />
-        <ActionButton
-          onPress={() => navigation.navigate("Signup")}
-          title="Create an account"
-          variant="secondary"
-        />
-      </View>
-
-      <Text style={styles.note}>
-        Account features are placeholders in this navigation step.
-      </Text>
+      {isAuthenticated ? (
+        <View style={styles.actions}>
+          {logoutError ? (
+            <Text accessibilityRole="alert" style={styles.error}>
+              {logoutError}
+            </Text>
+          ) : null}
+          <ActionButton
+            loading={isLoggingOut}
+            onPress={handleLogout}
+            title={isLoggingOut ? "Signing out..." : "Log out"}
+            variant="secondary"
+          />
+        </View>
+      ) : (
+        <View style={styles.actions}>
+          {restoreError ? (
+            <Text accessibilityRole="alert" style={styles.error}>
+              Saved session could not be restored: {restoreError}
+            </Text>
+          ) : null}
+          <ActionButton
+            onPress={() => navigation.navigate("Login")}
+            title="Login"
+          />
+          <ActionButton
+            onPress={() => navigation.navigate("Signup")}
+            title="Sign Up"
+            variant="secondary"
+          />
+        </View>
+      )}
     </ScrollView>
   );
 }
@@ -113,11 +165,9 @@ const styles = StyleSheet.create({
     gap: 11,
     marginTop: 8,
   },
-  note: {
-    color: colors.muted,
+  error: {
+    color: "#B42318",
     fontSize: 12,
     lineHeight: 18,
-    marginTop: 4,
-    textAlign: "center",
   },
 });
