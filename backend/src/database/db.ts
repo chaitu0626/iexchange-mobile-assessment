@@ -2,6 +2,8 @@ import fs from "node:fs";
 import path from "node:path";
 import Database from "better-sqlite3";
 import { env } from "../config/env";
+import { createTables } from "./schema";
+import { seedJobs } from "./seed";
 
 let db: Database.Database | undefined;
 
@@ -23,6 +25,8 @@ export function initDatabase(): Database.Database {
   db = new Database(absolutePath);
   db.pragma("journal_mode = WAL");
   db.pragma("foreign_keys = ON");
+  createTables(db);
+  seedJobs(db);
 
   return db;
 }
