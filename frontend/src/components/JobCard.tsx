@@ -1,4 +1,10 @@
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import {
+  ActivityIndicator,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { colors } from "./theme";
 
@@ -16,6 +22,7 @@ type JobCardProps = {
   onPress: () => void;
   onSave: () => void;
   isSaved?: boolean;
+  isSaving?: boolean;
 };
 
 export function JobCard({
@@ -23,6 +30,7 @@ export function JobCard({
   onPress,
   onSave,
   isSaved = false,
+  isSaving = false,
 }: JobCardProps) {
   return (
     <View style={styles.card}>
@@ -48,15 +56,24 @@ export function JobCard({
         <Pressable
           accessibilityLabel={isSaved ? "Remove saved job" : "Save job"}
           accessibilityRole="button"
-          accessibilityState={{ selected: isSaved }}
+          accessibilityState={{
+            busy: isSaving,
+            disabled: isSaving,
+            selected: isSaved,
+          }}
+          disabled={isSaving}
           onPress={onSave}
           style={({ pressed }) => [styles.saveButton, pressed && styles.pressed]}
         >
-          <Ionicons
-            name={isSaved ? "bookmark" : "bookmark-outline"}
-            size={24}
-            color={isSaved ? "#2563EB" : "#64748B"}
-          />
+          {isSaving ? (
+            <ActivityIndicator color="#2563EB" size="small" />
+          ) : (
+            <Ionicons
+              name={isSaved ? "bookmark" : "bookmark-outline"}
+              size={24}
+              color={isSaved ? "#2563EB" : "#64748B"}
+            />
+          )}
         </Pressable>
       </View>
       <Pressable

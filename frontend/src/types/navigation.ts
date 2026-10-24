@@ -10,6 +10,6 @@ export type RootStackParamList = {
 };
 
 export type MainTabParamList = {
-  Jobs: undefined;
+  Jobs: { openJobsTab?: "all" | "saved" } | undefined;
   Profile: undefined;
 };

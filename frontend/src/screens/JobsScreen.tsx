@@ -14,6 +14,7 @@ import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { colors } from "../components/theme";
 import { useAuth } from "../context/AuthContext";
+import { useSavedJobs } from "../context/SavedJobsContext";
 import { AllJobsScreen } from "./AllJobsScreen";
 import { SavedJobsScreen } from "./SavedJobsScreen";
 import type { MainTabParamList, RootStackParamList } from "../types/navigation";
@@ -25,13 +26,24 @@ type JobsScreenProps = CompositeScreenProps<
 
 type JobsTab = "all" | "saved";
 
-export function JobsScreen({ navigation }: JobsScreenProps) {
+export function JobsScreen({ navigation, route }: JobsScreenProps) {
   const [selectedTab, setSelectedTab] = useState<JobsTab>("all");
   const { isAuthenticated } = useAuth();
+  const { refreshSavedJobs, toggleSavedJob } = useSavedJobs();
   const insets = useSafeAreaInsets();
   const { width: windowWidth } = useWindowDimensions();
   const pageWidth = windowWidth - 24;
   const [translateX] = useState(() => new Animated.Value(0));
+
+  useEffect(() => {
+    return navigation.addListener("focus", () => {
+      const requestedTab = route.params?.openJobsTab;
+      if (requestedTab) {
+        setSelectedTab(requestedTab);
+        navigation.setParams({ openJobsTab: undefined });
+      }
+    });
+  }, [navigation, route.params?.openJobsTab]);
 
   useEffect(() => {
     const animation = Animated.timing(translateX, {
@@ -44,12 +56,18 @@ export function JobsScreen({ navigation }: JobsScreenProps) {
     return () => animation.stop();
   }, [pageWidth, selectedTab, translateX]);
 
+  useEffect(() => {
+    if (selectedTab === "saved" && isAuthenticated) {
+      void refreshSavedJobs();
+    }
+  }, [isAuthenticated, refreshSavedJobs, selectedTab]);
+
   const handleJobPress = useCallback(
     (jobId: string) => navigation.navigate("JobDetails", { jobId }),
     [navigation]
   );
 
-  const handleSaveJob = useCallback(() => {
+  const handleSaveJob = useCallback(async (jobId: string) => {
     if (!isAuthenticated) {
       Alert.alert(
         "Login required",
@@ -65,11 +83,15 @@ export function JobsScreen({ navigation }: JobsScreenProps) {
       return;
     }
 
-    Alert.alert(
-      "Saved Jobs",
-      "Saving jobs will be available when job services are connected."
-    );
-  }, [isAuthenticated, navigation]);
+    try {
+      await toggleSavedJob(jobId);
+    } catch (error) {
+      Alert.alert(
+        "Could not update saved job",
+        error instanceof Error ? error.message : "Please try again."
+      );
+    }
+  }, [isAuthenticated, navigation, toggleSavedJob]);
 
   return (
     <View style={styles.screen}>
@@ -140,7 +162,11 @@ export function JobsScreen({ navigation }: JobsScreenProps) {
               pointerEvents={selectedTab === "saved" ? "auto" : "none"}
               style={[styles.pane, { width: pageWidth }]}
             >
-              <SavedJobsScreen onBrowseJobs={() => setSelectedTab("all")} />
+              <SavedJobsScreen
+                onBrowseJobs={() => setSelectedTab("all")}
+                onJobPress={handleJobPress}
+                onLogin={() => navigation.navigate("Login")}
+              />
             </View>
           </Animated.View>
         </View>

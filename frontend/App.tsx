@@ -2,6 +2,7 @@ import { NavigationContainer } from "@react-navigation/native";
 import { StatusBar } from "expo-status-bar";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { AuthProvider } from "./src/context/AuthContext";
+import { SavedJobsProvider } from "./src/context/SavedJobsContext";
 import { RootNavigator } from "./src/navigation/RootNavigator";
 
 export default function App() {
@@ -9,9 +10,11 @@ export default function App() {
     <SafeAreaProvider>
       <StatusBar style="dark" />
       <AuthProvider>
-        <NavigationContainer>
-          <RootNavigator />
-        </NavigationContainer>
+        <SavedJobsProvider>
+          <NavigationContainer>
+            <RootNavigator />
+          </NavigationContainer>
+        </SavedJobsProvider>
       </AuthProvider>
     </SafeAreaProvider>
   );

@@ -56,3 +56,33 @@ export async function getJobById(id: string): Promise<Job> {
 
   return parseJob(response.data);
 }
+
+export async function getSavedJobs(token: string): Promise<Job[]> {
+  const response = await apiRequest("/jobs/saved", { token });
+
+  if (!isRecord(response) || !Array.isArray(response.data)) {
+    throw new Error("The server returned an unexpected saved jobs response.");
+  }
+
+  return response.data.map(parseJob);
+}
+
+export async function saveJob(id: string, token: string): Promise<Job> {
+  const response = await apiRequest(
+    `/jobs/${encodeURIComponent(id)}/save`,
+    { method: "POST", token }
+  );
+
+  if (!isRecord(response) || !("data" in response)) {
+    throw new Error("The server returned an unexpected saved job response.");
+  }
+
+  return parseJob(response.data);
+}
+
+export async function unsaveJob(id: string, token: string): Promise<void> {
+  await apiRequest(`/jobs/${encodeURIComponent(id)}/save`, {
+    method: "DELETE",
+    token,
+  });
+}

@@ -13,10 +13,11 @@ import { JobCard, type JobCardData } from "../components/JobCard";
 import { colors } from "../components/theme";
 import { getJobs } from "../services/jobsService";
 import type { Job } from "../types/job";
+import { useSavedJobs } from "../context/SavedJobsContext";
 
 type AllJobsScreenProps = {
   onJobPress: (jobId: string) => void;
-  onSaveJob: () => void;
+  onSaveJob: (jobId: string) => void | Promise<void>;
 };
 
 function getCompanyInitials(company: string): string {
@@ -89,6 +90,7 @@ export function AllJobsScreen({
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const requestSequence = useRef(0);
+  const { pendingJobIds, savedJobIds } = useSavedJobs();
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -190,11 +192,13 @@ export function AllJobsScreen({
         <JobCard
           job={item}
           onPress={() => onJobPress(item.id)}
-          onSave={onSaveJob}
+          onSave={() => onSaveJob(item.id)}
+          isSaved={savedJobIds.has(item.id)}
+          isSaving={pendingJobIds.has(item.id)}
         />
       );
     },
-    [onJobPress, onSaveJob]
+    [onJobPress, onSaveJob, pendingJobIds, savedJobIds]
   );
 
   const listHeader = (
