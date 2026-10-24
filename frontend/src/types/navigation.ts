@@ -4,7 +4,6 @@ export type RootStackParamList = {
   MainTabs: NavigatorScreenParams<MainTabParamList> | undefined;
   JobDetails: {
     jobId: string;
-    title: string;
   };
   Login: undefined;
   Signup: undefined;

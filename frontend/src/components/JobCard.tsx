@@ -6,8 +6,8 @@ export type JobCardData = {
   title: string;
   company: string;
   location: string;
-  type: string;
   initials: string;
+  skills: string[];
 };
 
 type JobCardProps = {
@@ -53,10 +53,18 @@ export function JobCard({ job, onPress, onSave }: JobCardProps) {
         style={({ pressed }) => [styles.bottomRow, pressed && styles.pressed]}
       >
         <Text style={styles.location}>{job.location}</Text>
-        <View style={styles.typePill}>
-          <Text style={styles.typeText}>{job.type}</Text>
-        </View>
       </Pressable>
+      {job.skills.length > 0 && (
+        <View style={styles.skillsRow}>
+          {job.skills.slice(0, 3).map((skill) => (
+            <View key={skill} style={styles.skillPill}>
+              <Text numberOfLines={1} style={styles.skillText}>
+                {skill}
+              </Text>
+            </View>
+          ))}
+        </View>
+      )}
     </View>
   );
 }
@@ -136,13 +144,19 @@ const styles = StyleSheet.create({
     color: colors.muted,
     fontSize: 13,
   },
-  typePill: {
+  skillsRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 7,
+  },
+  skillPill: {
     backgroundColor: colors.blueLight,
     borderRadius: 20,
-    paddingHorizontal: 10,
+    maxWidth: "48%",
+    paddingHorizontal: 9,
     paddingVertical: 5,
   },
-  typeText: {
+  skillText: {
     color: colors.blueDark,
     fontSize: 11,
     fontWeight: "700",

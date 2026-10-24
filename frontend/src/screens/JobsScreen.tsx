@@ -1,8 +1,7 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   Alert,
   Animated,
-  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -13,9 +12,9 @@ import type { BottomTabScreenProps } from "@react-navigation/bottom-tabs";
 import type { CompositeScreenProps } from "@react-navigation/native";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { JobCard, type JobCardData } from "../components/JobCard";
 import { colors } from "../components/theme";
 import { useAuth } from "../context/AuthContext";
+import { AllJobsScreen } from "./AllJobsScreen";
 import { SavedJobsScreen } from "./SavedJobsScreen";
 import type { MainTabParamList, RootStackParamList } from "../types/navigation";
 
@@ -25,33 +24,6 @@ type JobsScreenProps = CompositeScreenProps<
 >;
 
 type JobsTab = "all" | "saved";
-
-const sampleJobs: JobCardData[] = [
-  {
-    id: "sample-product-engineer",
-    title: "Product Engineer",
-    company: "Northstar Labs",
-    location: "Remote",
-    type: "Full time",
-    initials: "N",
-  },
-  {
-    id: "sample-mobile-developer",
-    title: "Mobile Developer",
-    company: "Bluebird Studio",
-    location: "New York, NY",
-    type: "Full time",
-    initials: "B",
-  },
-  {
-    id: "sample-frontend-engineer",
-    title: "Frontend Engineer",
-    company: "Cedar Technologies",
-    location: "Austin, TX",
-    type: "Hybrid",
-    initials: "C",
-  },
-];
 
 export function JobsScreen({ navigation }: JobsScreenProps) {
   const [selectedTab, setSelectedTab] = useState<JobsTab>("all");
@@ -72,12 +44,36 @@ export function JobsScreen({ navigation }: JobsScreenProps) {
     return () => animation.stop();
   }, [pageWidth, selectedTab, translateX]);
 
+  const handleJobPress = useCallback(
+    (jobId: string) => navigation.navigate("JobDetails", { jobId }),
+    [navigation]
+  );
+
+  const handleSaveJob = useCallback(() => {
+    if (!isAuthenticated) {
+      Alert.alert(
+        "Login required",
+        "Please log in or create an account to save jobs.",
+        [
+          { text: "Cancel", style: "cancel" },
+          {
+            text: "Login",
+            onPress: () => navigation.navigate("Login"),
+          },
+        ]
+      );
+      return;
+    }
+
+    Alert.alert(
+      "Saved Jobs",
+      "Saving jobs will be available when job services are connected."
+    );
+  }, [isAuthenticated, navigation]);
+
   return (
     <View style={styles.screen}>
-      <ScrollView
-        contentContainerStyle={[styles.content, { paddingTop: insets.top + 12 }]}
-        showsVerticalScrollIndicator={false}
-      >
+      <View style={[styles.content, { paddingTop: insets.top + 12 }]}>
         <View style={styles.headingRow}>
           <Text style={styles.title}>Opportunities</Text>
           <View accessibilityLabel="Information" style={styles.avatar}>
@@ -136,48 +132,10 @@ export function JobsScreen({ navigation }: JobsScreenProps) {
               pointerEvents={selectedTab === "all" ? "auto" : "none"}
               style={[styles.pane, { width: pageWidth }]}
             >
-              <View style={styles.listSection}>
-                <View style={styles.sectionHeader}>
-                  <Text style={styles.sectionTitle}>Latest opportunities</Text>
-                  <Text style={styles.resultCount}>{sampleJobs.length} jobs</Text>
-                </View>
-                {sampleJobs.map((job) => (
-                  <JobCard
-                    key={job.id}
-                    job={job}
-                    onSave={() => {
-                      if (!isAuthenticated) {
-                        Alert.alert(
-                          "Login required",
-                          "Please log in or create an account to save jobs.",
-                          [
-                            { text: "Cancel", style: "cancel" },
-                            {
-                              text: "Login",
-                              onPress: () => navigation.navigate("Login"),
-                            },
-                          ]
-                        );
-                        return;
-                      }
-
-                      Alert.alert(
-                        "Saved Jobs",
-                        "Saving jobs will be available when job services are connected."
-                      );
-                    }}
-                    onPress={() =>
-                      navigation.navigate("JobDetails", {
-                        jobId: job.id,
-                        title: job.title,
-                      })
-                    }
-                  />
-                ))}
-                <Text style={styles.placeholderNote}>
-                  Sample listings for the navigation setup.
-                </Text>
-              </View>
+              <AllJobsScreen
+                onJobPress={handleJobPress}
+                onSaveJob={handleSaveJob}
+              />
             </View>
             <View
               accessibilityElementsHidden={selectedTab !== "saved"}
@@ -191,7 +149,7 @@ export function JobsScreen({ navigation }: JobsScreenProps) {
             </View>
           </Animated.View>
         </View>
-      </ScrollView>
+      </View>
     </View>
   );
 }
@@ -202,8 +160,9 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   content: {
-    gap: 24,
-    paddingBottom: 32,
+    flex: 1,
+    gap: 20,
+    paddingBottom: 0,
     paddingHorizontal: 20,
   },
   headingRow: {
@@ -260,37 +219,16 @@ const styles = StyleSheet.create({
     color: colors.blueDark,
     fontWeight: "700",
   },
-  listSection: {
-    gap: 13,
-  },
-  sectionHeader: {
-    alignItems: "center",
-    flexDirection: "row",
-    justifyContent: "space-between",
-    marginBottom: 1,
-  },
-  sectionTitle: {
-    color: colors.navy,
-    fontSize: 17,
-    fontWeight: "700",
-  },
-  resultCount: {
-    color: colors.muted,
-    fontSize: 12,
-  },
-  placeholderNote: {
-    color: colors.muted,
-    fontSize: 12,
-    marginTop: 1,
-    textAlign: "center",
-  },
   paneViewport: {
+    flex: 1,
     overflow: "hidden",
   },
   paneTrack: {
+    flex: 1,
     flexDirection: "row",
   },
   pane: {
+    flex: 1,
     flexShrink: 0,
   },
 });

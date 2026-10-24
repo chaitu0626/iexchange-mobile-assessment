@@ -84,7 +84,7 @@ export function RootNavigator() {
       <Stack.Screen
         component={JobDetailsScreen}
         name="JobDetails"
-        options={({ route }) => ({ title: route.params.title })}
+        options={{ title: "Job Details" }}
       />
       <Stack.Screen component={LoginScreen} name="Login" options={{ title: "Sign in" }} />
       <Stack.Screen
