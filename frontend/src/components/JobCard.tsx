@@ -1,4 +1,5 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import { colors } from "./theme";
 
 export type JobCardData = {
@@ -14,9 +15,15 @@ type JobCardProps = {
   job: JobCardData;
   onPress: () => void;
   onSave: () => void;
+  isSaved?: boolean;
 };
 
-export function JobCard({ job, onPress, onSave }: JobCardProps) {
+export function JobCard({
+  job,
+  onPress,
+  onSave,
+  isSaved = false,
+}: JobCardProps) {
   return (
     <View style={styles.card}>
       <View style={styles.topRow}>
@@ -29,7 +36,7 @@ export function JobCard({ job, onPress, onSave }: JobCardProps) {
             <Text style={styles.companyInitials}>{job.initials}</Text>
           </View>
           <View style={styles.titleBlock}>
-            <Text numberOfLines={1} style={styles.title}>
+            <Text style={styles.title}>
               {job.title}
             </Text>
             <Text style={styles.company}>{job.company}</Text>
@@ -39,12 +46,17 @@ export function JobCard({ job, onPress, onSave }: JobCardProps) {
           </Text>
         </Pressable>
         <Pressable
-          accessibilityLabel="Save job"
+          accessibilityLabel={isSaved ? "Remove saved job" : "Save job"}
           accessibilityRole="button"
+          accessibilityState={{ selected: isSaved }}
           onPress={onSave}
           style={({ pressed }) => [styles.saveButton, pressed && styles.pressed]}
         >
-          <Text style={styles.saveIcon}>♡</Text>
+          <Ionicons
+            name={isSaved ? "bookmark" : "bookmark-outline"}
+            size={24}
+            color={isSaved ? "#2563EB" : "#64748B"}
+          />
         </Pressable>
       </View>
       <Pressable
@@ -52,6 +64,12 @@ export function JobCard({ job, onPress, onSave }: JobCardProps) {
         onPress={onPress}
         style={({ pressed }) => [styles.bottomRow, pressed && styles.pressed]}
       >
+        <View style={styles.locationIcon} accessibilityElementsHidden>
+          <View style={styles.locationTail} />
+          <View style={styles.locationPin}>
+            <View style={styles.locationDot} />
+          </View>
+        </View>
         <Text style={styles.location}>{job.location}</Text>
       </Pressable>
       {job.skills.length > 0 && (
@@ -72,8 +90,8 @@ export function JobCard({ job, onPress, onSave }: JobCardProps) {
 const styles = StyleSheet.create({
   card: {
     backgroundColor: colors.white,
-    borderColor: colors.border,
-    borderRadius: 18,
+    borderColor: "#E2E5EA",
+    borderRadius: 15,
     borderWidth: 1,
     gap: 18,
     padding: 17,
@@ -90,11 +108,6 @@ const styles = StyleSheet.create({
     height: 36,
     justifyContent: "center",
     width: 36,
-  },
-  saveIcon: {
-    color: colors.blue,
-    fontSize: 26,
-    lineHeight: 30,
   },
   pressed: {
     opacity: 0.82,
@@ -124,7 +137,7 @@ const styles = StyleSheet.create({
   title: {
     color: colors.navy,
     fontSize: 15,
-    fontWeight: "700",
+    fontWeight: "600",
   },
   company: {
     color: colors.muted,
@@ -138,7 +151,41 @@ const styles = StyleSheet.create({
   bottomRow: {
     alignItems: "center",
     flexDirection: "row",
-    justifyContent: "space-between",
+    gap: 7,
+  },
+  locationIcon: {
+    height: 17,
+    justifyContent: "flex-start",
+    position: "relative",
+    width: 14,
+  },
+  locationTail: {
+    backgroundColor: colors.muted,
+    height: 6,
+    left: 4,
+    position: "absolute",
+    top: 7,
+    transform: [{ rotate: "45deg" }],
+    width: 6,
+  },
+  locationPin: {
+    alignItems: "center",
+    backgroundColor: colors.white,
+    borderColor: colors.muted,
+    borderRadius: 7,
+    borderWidth: 1.5,
+    height: 12,
+    justifyContent: "center",
+    left: 1,
+    position: "absolute",
+    top: 0,
+    width: 12,
+  },
+  locationDot: {
+    backgroundColor: colors.muted,
+    borderRadius: 2,
+    height: 4,
+    width: 4,
   },
   location: {
     color: colors.muted,

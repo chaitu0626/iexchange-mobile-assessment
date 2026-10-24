@@ -276,7 +276,7 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     gap: 13,
     paddingBottom: 28,
-    paddingHorizontal: 20,
+    paddingHorizontal: 0,
     paddingTop: 6,
   },
   listHeader: {
@@ -286,7 +286,7 @@ const styles = StyleSheet.create({
   searchContainer: {
     alignItems: "center",
     backgroundColor: colors.white,
-    borderColor: colors.border,
+    borderColor: "#E2E5EA",
     borderRadius: 14,
     borderWidth: 1,
     flexDirection: "row",

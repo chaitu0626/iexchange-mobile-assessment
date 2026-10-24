@@ -30,7 +30,7 @@ export function JobsScreen({ navigation }: JobsScreenProps) {
   const { isAuthenticated } = useAuth();
   const insets = useSafeAreaInsets();
   const { width: windowWidth } = useWindowDimensions();
-  const pageWidth = windowWidth - 40;
+  const pageWidth = windowWidth - 24;
   const [translateX] = useState(() => new Animated.Value(0));
 
   useEffect(() => {
@@ -74,12 +74,7 @@ export function JobsScreen({ navigation }: JobsScreenProps) {
   return (
     <View style={styles.screen}>
       <View style={[styles.content, { paddingTop: insets.top + 12 }]}>
-        <View style={styles.headingRow}>
-          <Text style={styles.title}>Opportunities</Text>
-          <View accessibilityLabel="Information" style={styles.avatar}>
-            <Text style={styles.avatarText}>i</Text>
-          </View>
-        </View>
+        <Text style={styles.title}>Opportunities</Text>
 
         <View accessibilityRole="tablist" style={styles.tabs}>
           <TouchableOpacity
@@ -163,31 +158,13 @@ const styles = StyleSheet.create({
     flex: 1,
     gap: 20,
     paddingBottom: 0,
-    paddingHorizontal: 20,
-  },
-  headingRow: {
-    alignItems: "center",
-    flexDirection: "row",
-    justifyContent: "space-between",
+    paddingHorizontal: 12,
   },
   title: {
     color: colors.navy,
     fontSize: 25,
-    fontWeight: "800",
+    fontWeight: "600",
     letterSpacing: -0.6,
-  },
-  avatar: {
-    alignItems: "center",
-    backgroundColor: colors.blue,
-    borderRadius: 20,
-    height: 40,
-    justifyContent: "center",
-    width: 40,
-  },
-  avatarText: {
-    color: colors.white,
-    fontSize: 20,
-    fontWeight: "800",
   },
   tabs: {
     backgroundColor: "#E9EEF6",
