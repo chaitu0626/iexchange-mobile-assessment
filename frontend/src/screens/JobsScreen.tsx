@@ -41,9 +41,17 @@ export function JobsScreen({ navigation, route }: JobsScreenProps) {
       if (requestedTab) {
         setSelectedTab(requestedTab);
         navigation.setParams({ openJobsTab: undefined });
+      } else if (selectedTab === "saved" && isAuthenticated) {
+        void refreshSavedJobs();
       }
     });
-  }, [navigation, route.params?.openJobsTab]);
+  }, [
+    isAuthenticated,
+    navigation,
+    refreshSavedJobs,
+    route.params?.openJobsTab,
+    selectedTab,
+  ]);
 
   useEffect(() => {
     const animation = Animated.timing(translateX, {

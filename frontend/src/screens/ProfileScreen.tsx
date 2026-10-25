@@ -152,7 +152,11 @@ export function ProfileScreen({ navigation }: ProfileScreenProps) {
               <Ionicons color="#C62828" name="log-out-outline" size={19} />
             )}
             <Text style={styles.logoutLabel}>
-              {isLoggingOut ? "Logging out..." : "Logout"}
+              {isLoggingOut
+                ? "Logging out..."
+                : logoutError
+                  ? "Retry logout"
+                  : "Logout"}
             </Text>
           </Pressable>
         </>

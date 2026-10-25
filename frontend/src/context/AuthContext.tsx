@@ -4,6 +4,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
@@ -50,6 +51,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [session, setSession] = useState<AuthSession | null>(null);
   const [isRestoring, setIsRestoring] = useState(true);
   const [restoreError, setRestoreError] = useState<string | null>(null);
+  const logoutRequest = useRef<Promise<void> | null>(null);
 
   const handleUnauthorized = useCallback(async () => {
     setSession(null);
@@ -98,9 +100,25 @@ export function AuthProvider({ children }: AuthProviderProps) {
     setRestoreError(null);
   }, []);
 
-  const logout = useCallback(async () => {
-    setSession(null);
-    await clearStoredSession();
+  const logout = useCallback(() => {
+    if (logoutRequest.current) {
+      return logoutRequest.current;
+    }
+
+    const request = clearStoredSession().then(() => {
+      setSession(null);
+      setRestoreError(null);
+    });
+    logoutRequest.current = request;
+
+    const clearLogoutRequest = () => {
+      if (logoutRequest.current === request) {
+        logoutRequest.current = null;
+      }
+    };
+    void request.then(clearLogoutRequest, clearLogoutRequest);
+
+    return request;
   }, []);
 
   const value = useMemo<AuthContextValue>(
